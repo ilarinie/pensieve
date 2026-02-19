@@ -13,8 +13,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "outDir": "../../dist",
-    "composite": true
+    "outDir": "../../dist"
   },
   "include": ["src", "../types"]
 }

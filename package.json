@@ -15,7 +15,7 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint -c packages/server/eslint.config.mjs packages/server",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc -p packages/server/tsconfig.json --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx packages/server/src/db/migrate.ts",
     "prepare": "husky install"

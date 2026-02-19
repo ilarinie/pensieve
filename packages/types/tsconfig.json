@@ -8,8 +8,7 @@
     "verbatimModuleSyntax": true,
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
-    "composite": true
+    "noEmit": true
   },
   "include": ["."]
 }

@@ -1,7 +1,14 @@
 {
-  "files": [],
-  "references": [
-    { "path": "packages/server" },
-    { "path": "packages/types" }
-  ]
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": [],
+  "references": []
 }
