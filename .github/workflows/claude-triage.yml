@@ -1,0 +1,28 @@
+name: Claude Issue Triage
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Analyze this issue and:
+            1. Categorize as one of: bug, feature, question, chore
+            2. Assess priority: critical, high, medium, low
+            3. Add appropriate labels (create them if they don't exist)
+            4. Check for duplicate issues
+            5. Add a brief comment summarizing your triage assessment
+
+            Use: gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2"
+            Use: gh issue comment ${{ github.event.issue.number }} --body "message"
+          claude_args: |
+            --allowedTools "Bash(gh issue:*),Bash(gh search:*)"

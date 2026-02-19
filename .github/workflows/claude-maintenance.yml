@@ -1,0 +1,30 @@
+name: Weekly Maintenance
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Monday 8:00 UTC (10:00 Helsinki)
+  workflow_dispatch:
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Weekly maintenance audit. Check and report on:
+            1. Outdated dependencies (npm outdated)
+            2. Security vulnerabilities (npm audit)
+            3. Open issues older than 30 days
+            4. TODO/FIXME comments in the codebase
+            5. Any failing or missing tests
+
+            Create a single summary issue titled "Weekly maintenance report - <date>"
+            with all findings organized by category.
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,Bash(npm:*),Bash(gh issue:*),Bash(git:*)"
