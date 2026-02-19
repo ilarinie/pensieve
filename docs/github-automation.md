@@ -156,6 +156,95 @@ Creates a summary issue with findings.
 
 ---
 
+## Planning Workflow
+
+Structured workflow connecting planning → issue creation → parallel implementation.
+
+### Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/plan <description>` | Explore codebase, create structured plan in `docs/plans/` |
+| `/create-issues <plan-file>` | Parse plan file, create parent + sub-issues with dependencies |
+| `/implement <issue-number>` | Local TDD implementation of a single issue |
+
+### Layer System
+
+Plans decompose work into layers for parallelism:
+
+| Layer | Label | Meaning |
+|-------|-------|---------|
+| L0 | `layer:0` | Independent, no deps on new items — parallelizable |
+| L1 | `layer:1` | Depends on L0 items |
+| L2 | `layer:2` | Orchestrators wiring L0+L1 together |
+
+### Full Flow
+
+```
+/plan "Phase 3 - Cron scheduler"
+  → Claude explores codebase, writes docs/plans/phase-3-cron-scheduler.md
+  → User reviews/edits the plan file
+
+/create-issues docs/plans/phase-3-cron-scheduler.md
+  → Creates parent issue + sub-issues with blocked-by relationships
+  → All added to project board in "Todo"
+
+/implement 42  (local, interactive)
+  — OR —
+Add "claude:implement" label  (remote, async via GitHub Action)
+  → Branch created, TDD implementation, PR opened
+
+PR merged → issue auto-closes → board moves to Done
+```
+
+### Plan File Format
+
+Plan files live in `docs/plans/` with YAML frontmatter and layered work items:
+
+```markdown
+---
+feature: Phase 3 - Cron Scheduler
+description: >
+  Add cron-based scheduling for daily digest emails.
+labels:
+  - feature
+---
+
+## Work Items
+
+### L0: schedule-config — Schedule configuration service
+**Branch:** `feat/phase-3-schedule-config`
+**Files:**
+- packages/types/schedule.ts (new)
+- packages/server/src/services/schedule/schedule-config.ts (new)
+- packages/server/src/services/schedule/schedule-config.test.ts (new)
+
+**Description:**
+Parse and validate cron schedule configurations.
+
+**Acceptance Criteria:**
+- [ ] Validates cron expressions
+- [ ] Returns parsed schedule object
+
+---
+
+### L1: cron-runner — Cron job runner
+**Depends on:** schedule-config
+**Branch:** `feat/phase-3-cron-runner`
+...
+```
+
+### GitHub Resources
+
+| Resource | Node ID |
+|----------|---------|
+| Repo | `R_kgDORUITUg` |
+| Project | `PVT_kwHOAHTkk84BPpUQ` |
+| Status field | `PVTSSF_lAHOAHTkk84BPpUQzg9_rzQ` |
+| "Todo" option | `2eec6910` |
+
+---
+
 ## Maintenance
 
 - **MCP server** requires Docker running (`docker ps` to verify)

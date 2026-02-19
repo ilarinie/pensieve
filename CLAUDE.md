@@ -177,3 +177,17 @@ All validated at startup via Zod in `env.ts`. App crashes immediately on missing
 - Shared types in `packages/types/`, one type per file
 - Use `type` not `interface` (functional style)
 - Prefer Zod schemas with `z.infer<typeof schema>` for runtime-validated types
+
+## Planning Workflow
+
+1. `/plan <description>` — create structured plan in `docs/plans/`
+2. Review/edit the plan file
+3. `/create-issues <plan-file>` — create GitHub issues with dependencies
+4. `/implement <issue-number>` — local TDD implementation (or use `claude:implement` label for remote)
+
+Plans use the layer system (L0/L1/L2):
+- L0: No dependencies on other new items (parallelizable)
+- L1: Depends on L0 items
+- L2: Orchestrators wiring everything together
+
+Each work item = one sub-issue = one branch = one PR.
