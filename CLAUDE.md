@@ -121,7 +121,7 @@ Conventions:
 
 ## Git Workflow
 
-Fully automatic — branches, commits, rebases, merges happen without user confirmation.
+Fully automatic — branches, commits, rebases, PRs happen without user confirmation.
 
 Branch naming:
 
@@ -136,12 +136,36 @@ Commit format: `<type>: <description>`
 - **NO Co-Authored-By or any other signatures**
 - **NO GPG signatures**
 
-Merge strategy:
+PR workflow:
 
-- Always `git rebase main` before merge
-- Always `git merge --ff-only` — no merge commits
-- Delete branch after merge
-- Every development item gets its own branch
+- Every issue gets its own branch and pull request
+- Push the branch, create a PR with `gh pr create`
+- PRs are reviewed (automated + human) before merging
+- Use squash-merge or ff-only merge on GitHub
+
+### Stacked PRs (PR trains)
+
+When implementing multiple issues that depend on each other (e.g., L0 → L1 → L2):
+
+1. **First issue**: branch from `main`, push, create PR targeting `main`
+2. **Next issue**: branch from the previous issue's branch, push, create PR targeting the previous branch
+3. Continue stacking — each PR shows only its own diff
+4. Merge from bottom up: merge the first PR into `main`, then retarget the next PR to `main`, merge, repeat
+
+Example for Phase N with issues #10 (L0), #11 (L1), #12 (L2):
+
+```
+main ← PR #A (feat/phase-n-types)
+         ← PR #B (feat/phase-n-service)    [base: feat/phase-n-types]
+              ← PR #C (feat/phase-n-handler) [base: feat/phase-n-service]
+```
+
+Rules:
+
+- Each PR must be small enough for a single review pass
+- PR description must note base branch if not `main`
+- After merging bottom PR, retarget dependent PRs to `main` (or the new base)
+- Delete branches after merge
 
 ## Dependency Injection Pattern
 
@@ -183,11 +207,28 @@ All validated at startup via Zod in `env.ts`. App crashes immediately on missing
 1. `/plan <description>` — create structured plan in `docs/plans/`
 2. Review/edit the plan file
 3. `/create-issues <plan-file>` — create GitHub issues with dependencies
-4. `/implement <issue-number>` — local TDD implementation (or use `claude:implement` label for remote)
 
 Plans use the layer system (L0/L1/L2):
 - L0: No dependencies on other new items (parallelizable)
 - L1: Depends on L0 items
 - L2: Orchestrators wiring everything together
 
-Each work item = one sub-issue = one branch = one PR.
+## Implementation Workflow
+
+Each issue = one branch = one PR. For dependent issues, use stacked PRs.
+
+For each issue:
+
+1. Create branch from base (main for L0, previous issue's branch for L1/L2)
+2. Write tests first (TDD), implement, verify all checks pass
+3. Commit with descriptive messages
+4. Push and create PR (`gh pr create`)
+   - Target `main` for L0 issues (or standalone work)
+   - Target the previous issue's branch for dependent L1/L2 issues
+5. Move to next issue, branching from the current branch
+
+After review/merge:
+
+- Merge PRs bottom-up (L0 first, then L1, then L2)
+- Retarget dependent PRs to `main` after their base is merged
+- Close corresponding GitHub issues
