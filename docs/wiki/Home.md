@@ -13,6 +13,7 @@ Pensieve is a personal memory assistant with a Telegram bot interface, PostgreSQ
 ## Pages
 
 - [Home](Home) — This page
+- [Health Check Endpoint](health-check-endpoint) — HTTP liveness endpoint
 
 ## Development
 
