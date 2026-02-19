@@ -63,6 +63,7 @@ export const storeMemory = async (
 ```
 
 Rules:
+
 - `@param` for every parameter, description must match what the param actually is
 - `@returns` describing the return value
 - Summary line describing what the function does (not how)
@@ -73,8 +74,13 @@ Rules:
 Main processes are written as top-to-bottom sequences of named function calls:
 
 ```typescript
-export const processIncomingMessage = async (ctx: BotContext): Promise<void> => {
-  const memory = await storeMemory(db, { content: ctx.message.text, source: 'telegram' })
+export const processIncomingMessage = async (
+  ctx: BotContext,
+): Promise<void> => {
+  const memory = await storeMemory(db, {
+    content: ctx.message.text,
+    source: 'telegram',
+  })
   await enqueueEmbedding(memory.id)
   const hasTask = await triageForTask(memory.content)
   if (hasTask) {
@@ -85,6 +91,7 @@ export const processIncomingMessage = async (ctx: BotContext): Promise<void> => 
 ```
 
 Rules:
+
 - Orchestrators contain NO business logic — only calls + control flow
 - Each called function is independently testable
 - Error handling wraps the orchestrator level (try/catch around the whole flow)
@@ -95,6 +102,7 @@ Rules:
 Workflow: write test first → implement → refactor → verify green
 
 Conventions:
+
 - `describe('functionName', () => { ... })` — named after the exported function
 - `test('should ...', () => { ... })` — not `it`, descriptive sentence
 - `import { describe, test, expect, vi, beforeEach } from 'vitest'`
@@ -116,17 +124,20 @@ Conventions:
 Fully automatic — branches, commits, rebases, merges happen without user confirmation.
 
 Branch naming:
+
 - Phase work: `feat/phase-N-short-name`
 - Feature: `feat/description`
 - Fix: `fix/description`
 
 Commit format: `<type>: <description>`
+
 - Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`
 - Lowercase, imperative mood, no period, under 72 chars
 - **NO Co-Authored-By or any other signatures**
 - **NO GPG signatures**
 
 Merge strategy:
+
 - Always `git rebase main` before merge
 - Always `git merge --ff-only` — no merge commits
 - Delete branch after merge
@@ -152,6 +163,7 @@ In tests, pass a mock directly: `storeMemory(mockDb, testInput)`. No `vi.mock()`
 ## Import Order
 
 Managed automatically by Prettier with @trivago/prettier-plugin-sort-imports:
+
 1. External packages (node_modules)
 2. Type imports from `../../types/`
 3. Local imports (`./` and `../`)

@@ -6,26 +6,27 @@ Build a personal "Pensieve" (Dumbledore's memory well) — a system to dump thou
 
 ## Confirmed Decisions
 
-| Area | Decision |
-|------|----------|
-| **Interface** | Telegram bot (grammY, long polling dev / webhooks prod) |
-| **WhatsApp** | Manual chat export → send .txt to Telegram bot for ingestion. Baileys as future option |
-| **Telegram history** | gramjs Client API to ingest existing conversations |
-| **Calendar** | Skip for now |
-| **Web UI** | None initially |
-| **Database** | PostgreSQL 16 + pgvector (structured + FTS + vector in one DB) |
-| **Embeddings** | Ollama (nomic-embed-text) locally, swappable to Voyage AI later |
-| **LLM** | Claude API for reasoning, chat, task extraction, daily compilation |
-| **Connectors** | Simple tool registry — each connector is a TS file with standard interface, auto-registered as Claude tool |
-| **Package manager** | npm + Node.js (npm workspaces, package-lock.json) |
-| **Docker base** | node:20-slim (matches shopperfish/stack-manager infra) |
-| **Deployment** | Docker Swarm + Traefik on `pensieve.saturanta.net` |
+| Area                 | Decision                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Interface**        | Telegram bot (grammY, long polling dev / webhooks prod)                                                    |
+| **WhatsApp**         | Manual chat export → send .txt to Telegram bot for ingestion. Baileys as future option                     |
+| **Telegram history** | gramjs Client API to ingest existing conversations                                                         |
+| **Calendar**         | Skip for now                                                                                               |
+| **Web UI**           | None initially                                                                                             |
+| **Database**         | PostgreSQL 16 + pgvector (structured + FTS + vector in one DB)                                             |
+| **Embeddings**       | Ollama (nomic-embed-text) locally, swappable to Voyage AI later                                            |
+| **LLM**              | Claude API for reasoning, chat, task extraction, daily compilation                                         |
+| **Connectors**       | Simple tool registry — each connector is a TS file with standard interface, auto-registered as Claude tool |
+| **Package manager**  | npm + Node.js (npm workspaces, package-lock.json)                                                          |
+| **Docker base**      | node:20-slim (matches shopperfish/stack-manager infra)                                                     |
+| **Deployment**       | Docker Swarm + Traefik on `pensieve.saturanta.net`                                                         |
 
 ## Architecture
 
 Single TypeScript monorepo (npm workspaces: `packages/server`, `packages/types`). One Express process runs the HTTP health endpoint, Telegram bot, and cron scheduler. PostgreSQL + pgvector handles all storage and search. Ollama provides local embeddings.
 
 ### Docker Stack (3 services)
+
 - **pensieve** — the TypeScript app
 - **postgres** — pgvector/pgvector:pg16
 - **ollama** — ollama/ollama with nomic-embed-text model
@@ -33,6 +34,7 @@ Single TypeScript monorepo (npm workspaces: `packages/server`, `packages/types`)
 ## Database Schema
 
 ### `memories` table
+
 - `id` (UUID), `content` (text)
 - `search` (tsvector — `customType` + `generatedAlwaysAs(to_tsvector('english', content))`)
 - `category`, `source`, `tags` (text[]), `metadata` (JSONB)
@@ -41,6 +43,7 @@ Single TypeScript monorepo (npm workspaces: `packages/server`, `packages/types`)
 - Indexes: GIN on search (tsvector), GIN on tags
 
 ### `memory_embeddings` table (separate for model-swap flexibility)
+
 - `id` (UUID), `memory_id` (FK → memories), `model` (text, e.g. "nomic-embed-text")
 - `embedding` (vector(768) — native Drizzle type, dimension varies by model)
 - `created_at`
@@ -48,11 +51,13 @@ Single TypeScript monorepo (npm workspaces: `packages/server`, `packages/types`)
 - Unique constraint: (memory_id, model)
 
 ### `tasks` table
+
 - `id` (UUID), `title`, `description`, `status` (pending/done/snoozed/cancelled)
 - `priority` (1-3), `due_date`, `reminder_at`, `snoozed_until` (timestamptz, nullable), `completed_at`
 - `source_memory_id` (FK → memories)
 
 ### `ingestion_log` table (deduplication)
+
 - `id`, `source`, `external_id`, `dedup_hash` (SHA-256 of sender+timestamp+content+sequence_index), `memory_id` (FK)
 - Unique index on (source, external_id)
 
@@ -99,6 +104,7 @@ i-l-e-personal-assistant/
 ## Implementation Phases
 
 ### Phase 1: Project Scaffold + Database
+
 - Init monorepo with npm workspaces, TypeScript, Drizzle ORM
 - Zod env validation, Winston logger (same pattern as shopperfish)
 - Database schema with native Drizzle pgvector type + tsvector generated column
@@ -107,18 +113,21 @@ i-l-e-personal-assistant/
 - **Milestone**: `npm run db:migrate` works, Express starts
 
 ### Phase 2: Telegram Bot + Memory Ingestion
+
 - grammY bot with long polling (dev) / webhooks (prod), auth middleware (whitelist Telegram user IDs)
 - Ollama embedding service (HTTP calls to `/api/embeddings`), wrapped in shared `EmbeddingQueue` (`p-limit`, concurrency=3) to prevent OOM during bulk operations
 - Async ingestion pipeline: bot stores text to DB immediately → replies "Stored." → background job generates embedding + stores in `memory_embeddings`
 - **Milestone**: Send message to bot, it replies instantly and embedding appears in DB shortly after
 
 ### Phase 3: RAG Chat (Claude)
+
 - Hybrid search: pgvector cosine similarity + PostgreSQL FTS, merged with RRF
 - `answer-question` service: embed query → search → fill memories into Claude context greedily by RRF rank until ~6000-token budget is hit (estimated as chars/4; truncate last memory if needed) → return answer. System prompt includes current Helsinki datetime + day of week for time-aware reasoning.
 - `/ask` bot command
 - **Milestone**: `/ask when did I mention X` returns a real answer
 
 ### Phase 4: Task Extraction
+
 - **Triage step**: Haiku does a cheap binary check "does this contain a task?" — only positives go to full extraction
 - Explicit `#todo` prefix bypasses triage and goes straight to extraction
 - Claude tool use (Sonnet/Opus) to extract tasks with due dates from unstructured input. System prompt includes current Helsinki datetime + day of week so relative dates ("by Friday") resolve correctly.
@@ -127,17 +136,20 @@ i-l-e-personal-assistant/
 - **Milestone**: "call dentist by Friday" auto-creates a task with due date; random thoughts don't trigger expensive Claude calls
 
 ### Phase 5: WhatsApp Export Ingestion
+
 - Use `whatsapp-chat-parser` npm library (handles multiple date formats, iOS/Android). Configure `daysFirst: true` for Finnish dates. Add defensive wrapper: try daysFirst=true, fallback to false, validate dates are sane.
 - Bot document handler: receive .txt file → parse → batch DB inserts (100 per INSERT) → push memory IDs onto shared `EmbeddingQueue`. Progress reported via bot message edits.
 - Dedup hash includes `sequence_index` (per-sender counter within each minute bucket) to handle WhatsApp's minute-resolution timestamps.
 - **Milestone**: Upload WhatsApp export, bot reports N messages ingested
 
 ### Phase 6: Daily Digest + Reminders
+
 - Cron job at 07:00 Helsinki time: yesterday's memories + upcoming tasks → Claude generates digest → sends via bot
 - Hourly cron: check tasks with `reminder_at` in next hour, send reminders. Also checks `status = 'snoozed' AND snoozed_until <= NOW()`, transitions back to pending, notifies user.
 - **Milestone**: Daily morning message arrives automatically
 
 ### Phase 7: Telegram History Ingestion
+
 - gramjs Client API integration
 - One-time interactive auth script (`scripts/get-telegram-session.ts`) to generate session string
 - Rate limiting: batches of 100 with 1-2s jitter. Set `client.floodSleepThreshold = 120` for auto-handling short waits. For FloodWaitErrors above threshold, catch explicitly, log wait time, sleep for exact `error.seconds * 1000` ms, retry same batch.
@@ -147,10 +159,12 @@ i-l-e-personal-assistant/
 - **Milestone**: Import an existing Telegram chat's history
 
 ### Phase 7.5: Create HNSW Vector Index
+
 - Run migration to create HNSW index after bulk data imports are complete: `CREATE INDEX CONCURRENTLY idx_memory_embeddings_hnsw ON memory_embeddings USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64)`
 - **Milestone**: Vector similarity queries use index scan instead of sequential scan
 
 ### Phase 8: Connector/Tool Registry
+
 - Define `Connector` interface: `{ name, description, inputSchema, execute(input) }`
 - Build registry that auto-discovers connector files from `connectors/` directory
 - Integrate with Claude chat: registered connectors become available as Claude tools during `/ask` conversations
@@ -160,6 +174,7 @@ i-l-e-personal-assistant/
 - **Milestone**: "add milk to the shopping list" via bot actually calls the shopping list API
 
 ### Phase 9: Docker + Deploy
+
 - Dockerfile: `FROM node:20-slim`, copy `package-lock.json` + `package.json`, `npm ci`, copy source, `npm run build`, `CMD ["node", "dist/server/src/index.js"]`.
 - deploy.yml with 3 services (app + postgres + ollama), Traefik labels, volumes
 - Ollama container: memory reservation 2G, limit 4G to prevent OOM cascading
@@ -203,6 +218,7 @@ i-l-e-personal-assistant/
 - `whatsapp-chat-parser` — WhatsApp export parser (multi-format, iOS/Android)
 
 ## Reference Files
+
 - `/Users/ilarinieminen/scripts/stack-manager` — deployment script (builds Docker image, pushes to purkkaMAX:5000, SCPs deploy.yml, runs `docker stack deploy`)
 - `/Users/ilarinieminen/PersonalProjects/shopperfish/deploy.yml` — deploy.yml template (Traefik labels, healthcheck, volumes, networks)
 
