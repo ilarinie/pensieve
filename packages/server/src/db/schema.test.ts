@@ -121,13 +121,22 @@ describe('ingestionLog', () => {
     expect(columnNames).toContain('created_at')
   })
 
-  test('should have unique index on source and external_id', () => {
+  test('should have unique index on source and dedup_hash', () => {
     const config = getTableConfig(ingestionLog)
     const uniqueIdx = config.indexes.find(
-      (i) => i.config.name === 'idx_ingestion_log_source_external_id',
+      (i) => i.config.name === 'idx_ingestion_log_source_dedup_hash',
     )
 
     expect(uniqueIdx).toBeDefined()
     expect(uniqueIdx?.config.unique).toBe(true)
+  })
+
+  test('should have index on source and external_id', () => {
+    const config = getTableConfig(ingestionLog)
+    const idx = config.indexes.find(
+      (i) => i.config.name === 'idx_ingestion_log_source_external_id',
+    )
+
+    expect(idx).toBeDefined()
   })
 })

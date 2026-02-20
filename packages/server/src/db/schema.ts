@@ -13,6 +13,11 @@ import {
   vector,
 } from 'drizzle-orm/pg-core'
 
+// Exception to one-export-per-file rule: drizzle-kit requires all tables in
+// a single file (or files without cross-imports using .js extensions, which
+// conflicts with our ESLint import/extensions rule). Schema files with FK
+// references between tables cannot be split without breaking drizzle-kit.
+
 const tsvector = customType<{ data: string }>({
   dataType() {
     return 'tsvector'
@@ -97,6 +102,10 @@ export const tasks = pgTable('tasks', {
 
 /**
  * Ingestion log for deduplication of imported content.
+ *
+ * Two-level deduplication:
+ * - `(source, dedup_hash)` unique index handles all sources reliably
+ * - `(source, external_id)` index provides fast lookup for known-ID sources
  */
 export const ingestionLog = pgTable(
   'ingestion_log',
@@ -113,7 +122,11 @@ export const ingestionLog = pgTable(
       .notNull(),
   },
   (table) => [
-    uniqueIndex('idx_ingestion_log_source_external_id').on(
+    uniqueIndex('idx_ingestion_log_source_dedup_hash').on(
+      table.source,
+      table.dedupHash,
+    ),
+    index('idx_ingestion_log_source_external_id').on(
       table.source,
       table.externalId,
     ),

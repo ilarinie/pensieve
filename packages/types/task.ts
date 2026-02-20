@@ -15,8 +15,8 @@ export type Task = {
   id: string
   title: string
   description: string | null
-  status: string
-  priority: number | null
+  status: TaskStatus
+  priority: TaskPriority | null
   dueDate: Date | null
   reminderAt: Date | null
   snoozedUntil: Date | null
