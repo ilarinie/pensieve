@@ -1,4 +1,4 @@
-# /plan — Create a structured implementation plan
+# /planner — Create a structured implementation plan
 
 disable-model-invocation: true
 
@@ -25,6 +25,7 @@ Read the user's feature description from `$ARGUMENTS`. If the description is vag
 ### 2. Explore the codebase
 
 Use Read, Grep, and Glob to understand:
+
 - Existing services, types, and patterns in `packages/server/src/`
 - Shared types in `packages/types/`
 - Database schema in `packages/server/src/db/schema/`
@@ -34,11 +35,13 @@ Use Read, Grep, and Glob to understand:
 ### 3. Decompose into layered work items
 
 Apply the layer system:
+
 - **L0** — Independent items with no dependencies on other new items. These can be built in parallel. Typically: new types, standalone services, utility functions.
 - **L1** — Items that depend on L0 items. Typically: services that use L0 services, API endpoints that use L0 types.
 - **L2** — Orchestrators that wire everything together. Depend on L1 items. Typically: handler functions, integration points.
 
 Each work item should be:
+
 - Small enough for a single branch and PR
 - Independently testable
 - Named with a kebab-case slug (used as identifier before issue numbers exist)
@@ -60,8 +63,10 @@ labels:
 ## Work Items
 
 ### L0: <slug> — <Short title>
+
 **Branch:** `feat/<phase-or-feature>-<slug>`
 **Files:**
+
 - <path/to/file.ts> (new|modify)
 - <path/to/file.test.ts> (new|modify)
 
@@ -69,26 +74,31 @@ labels:
 <What this work item does. 2-3 sentences.>
 
 **Acceptance Criteria:**
+
 - [ ] <Criterion 1>
 - [ ] <Criterion 2>
 
 ---
 
 ### L1: <slug> — <Short title>
+
 **Depends on:** <slug-of-L0-item>, <another-slug>
 **Branch:** `feat/<phase-or-feature>-<slug>`
 **Files:**
+
 - <path/to/file.ts> (new|modify)
 
 **Description:**
 <What this work item does.>
 
 **Acceptance Criteria:**
+
 - [ ] <Criterion 1>
 
 ---
 
 ### L2: <slug> — <Short title>
+
 **Depends on:** <slug-of-L1-item>
 **Branch:** `feat/<phase-or-feature>-<slug>`
 ...
@@ -107,6 +117,7 @@ labels:
 ### 6. Present the plan
 
 After writing the file, tell the user:
+
 - The plan file path
 - A summary of the layer structure (how many items per layer)
 - Suggest they review and edit the file before running `/create-issues`

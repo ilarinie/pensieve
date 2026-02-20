@@ -65,85 +65,9 @@ Capture the issue number and node ID from the output. To get the node ID:
 gh issue view <number> --repo ilarinie/pensieve --json id --jq '.id'
 ```
 
-### 4. Create sub-issues
+### 4. Add parent issue to project board
 
-For each work item, create a sub-issue using GraphQL (to set parentIssueId):
-
-```bash
-gh api graphql -f query='
-  mutation {
-    createIssue(input: {
-      repositoryId: "R_kgDORUITUg"
-      title: "<slug>: <title>"
-      body: "<description + acceptance criteria as checkboxes>"
-      parentIssueId: "<parent node ID>"
-    }) {
-      issue {
-        id
-        number
-      }
-    }
-  }
-'
-```
-
-After creating each sub-issue:
-- Store the mapping: `slug → { nodeId, number }`
-- Add labels using `gh issue edit <number> --add-label "layer:<N>,claude:implement,<frontmatter labels>"`
-
-### 5. Set dependency relationships
-
-For each work item that has a `Depends on:` field, set blocked-by relationships:
-
-```bash
-gh api graphql -f query='
-  mutation {
-    addSubIssueToIssue(input: {
-      issueId: "<dependent issue node ID>"
-      subIssueId: "<blocking issue node ID>"
-    }) {
-      issue { id }
-    }
-  }
-'
-```
-
-Wait — that's the sub-issue mutation. For **dependencies** (blocked-by), use:
-
-```bash
-gh api graphql -f query='
-  mutation {
-    createLinkedBranch(input: {
-      issueId: "<issue node ID>"
-      oid: "main"
-      name: "<branch name>"
-      repositoryId: "R_kgDORUITUg"
-    }) {
-      linkedBranch { id }
-    }
-  }
-'
-```
-
-Actually, for blocked-by dependencies, the correct approach is to use issue type links. Since the GitHub GraphQL API for issue dependencies may vary, use the REST-based approach:
-
-For each item with `Depends on: <slug>`:
-1. Look up the blocking issue number from the slug mapping
-2. Add a "blocked by #N" line to the issue body, or use the GraphQL `addIssueRelation` mutation if available
-
-**Practical approach**: Update each dependent issue's body to include a "Blocked by" section:
-
-```bash
-# Get current body
-BODY=$(gh issue view <number> --repo ilarinie/pensieve --json body --jq '.body')
-# Prepend blocked-by info
-gh issue edit <number> --repo ilarinie/pensieve \
-  --body "**Blocked by:** #<blocking-number>
-
-$BODY"
-```
-
-### 6. Add parent issue to project board
+Add the parent issue to the project board **before** creating sub-issues. This allows the "Auto-add sub-issues to project" workflow to fire for each sub-issue.
 
 ```bash
 # Add to project
@@ -171,6 +95,72 @@ gh api graphql -f query='
     }
   }
 '
+```
+
+### 5. Create sub-issues
+
+For each work item, create a sub-issue using GraphQL (to set parentIssueId):
+
+```bash
+gh api graphql -f query='
+  mutation {
+    createIssue(input: {
+      repositoryId: "R_kgDORUITUg"
+      title: "<slug>: <title>"
+      body: "<description + acceptance criteria as checkboxes>"
+      parentIssueId: "<parent node ID>"
+    }) {
+      issue {
+        id
+        number
+      }
+    }
+  }
+'
+```
+
+After creating each sub-issue:
+- Store the mapping: `slug → { nodeId, number }`
+- Add labels using `gh issue edit <number> --add-label "layer:<N>,claude:implement,<frontmatter labels>"`
+
+If the work item has a `Depends on:` field, prepend a "Blocked by" section to the issue body referencing the dependency issue numbers (looked up from the slug mapping):
+
+```
+**Blocked by:** #<blocking-number-1>, #<blocking-number-2>
+```
+
+### 6. Add sub-issues to project board
+
+After creating all sub-issues, verify each one is on the project board. The "Auto-add sub-issues to project" workflow may handle this, but as a reliable fallback, explicitly add each sub-issue and set its status:
+
+```bash
+for NODE_ID in <list of sub-issue node IDs>; do
+  # Add to project
+  ITEM_ID=$(gh api graphql -f query='
+    mutation {
+      addProjectV2ItemById(input: {
+        projectId: "PVT_kwHOAHTkk84BPpUQ"
+        contentId: "'"$NODE_ID"'"
+      }) {
+        item { id }
+      }
+    }
+  ' --jq '.data.addProjectV2ItemById.item.id')
+
+  # Set status to Todo
+  gh api graphql -f query='
+    mutation {
+      updateProjectV2ItemFieldValue(input: {
+        projectId: "PVT_kwHOAHTkk84BPpUQ"
+        itemId: "'"$ITEM_ID"'"
+        fieldId: "PVTSSF_lAHOAHTkk84BPpUQzg9_rzQ"
+        value: { singleSelectOptionId: "2eec6910" }
+      }) {
+        projectV2Item { id }
+      }
+    }
+  '
+done
 ```
 
 ### 7. Print summary
