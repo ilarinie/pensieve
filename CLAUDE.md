@@ -202,6 +202,16 @@ All validated at startup via Zod in `env.ts`. App crashes immediately on missing
 - Use `type` not `interface` (functional style)
 - Prefer Zod schemas with `z.infer<typeof schema>` for runtime-validated types
 
+## Documentation
+
+Wiki documentation lives in `docs/wiki/` and syncs to the GitHub Wiki on merge to main.
+
+- `/document <feature>` — create or update a wiki page
+- Every doc page has YAML frontmatter with `sources:` listing the files it documents
+- PR reviews check for doc staleness (changed source files → flagged wiki pages)
+- Mermaid diagrams for process flows and architecture
+- Code links use `/blob/main/...` URLs to the source files
+
 ## Planning Workflow
 
 1. `/plan <description>` — create structured plan in `docs/plans/`

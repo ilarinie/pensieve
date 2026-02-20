@@ -31,5 +31,14 @@ jobs:
             - const + arrow for exports
             - type not interface
             - kebab-case file names
+
+            Documentation check:
+            - Read docs/wiki/*.md files and their frontmatter `sources:` lists
+            - If any file in the PR diff appears in a doc page's `sources:`, flag that
+              the documentation may need updating and name the specific wiki page(s)
+            - If new service files, handlers, or significant features are added
+              (e.g. new files in packages/server/src/services/ or packages/server/src/handlers/)
+              and no docs/wiki/ page lists them in its sources, suggest creating documentation
+
             Post inline comments for specific issues.
             Approve if the PR follows all rules, request changes otherwise.
