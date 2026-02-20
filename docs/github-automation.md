@@ -166,7 +166,6 @@ Structured workflow connecting planning → issue creation → parallel implemen
 |-------|---------|
 | `/plan <description>` | Explore codebase, create structured plan in `docs/plans/` |
 | `/create-issues <plan-file>` | Parse plan file, create parent + sub-issues with dependencies |
-| `/implement <issue-number>` | Local TDD implementation of a single issue |
 
 ### Layer System
 
@@ -189,10 +188,10 @@ Plans decompose work into layers for parallelism:
   → Creates parent issue + sub-issues with blocked-by relationships
   → All added to project board in "Todo"
 
-/implement 42  (local, interactive)
-  — OR —
-Add "claude:implement" label  (remote, async via GitHub Action)
-  → Branch created, TDD implementation, PR opened
+Implementation: each issue → branch → PR (stacked for dependent issues)
+  → TDD implementation, push branch, create PR
+  → Automated review via claude-review workflow
+  → Merge bottom-up (L0 → L1 → L2)
 
 PR merged → issue auto-closes → board moves to Done
 ```
