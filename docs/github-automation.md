@@ -256,8 +256,10 @@ the repo and wiki views.
 
 **File:** `.github/workflows/wiki-sync.yml`
 
-Triggers on push to `main` when files in `docs/wiki/` change. Clones the wiki repo,
-copies all markdown files, commits, and pushes.
+| Skill | Purpose |
+|-------|---------|
+| `/plan <description>` | Explore codebase, create structured plan in `docs/plans/` |
+| `/create-issues <plan-file>` | Parse plan file, create parent + sub-issues with dependencies |
 
 **Prerequisite:** The wiki must be initialized manually via the GitHub UI (Settings →
 enable Wiki → create Home page). Actions cannot create the wiki repo.
@@ -272,12 +274,10 @@ Creates or updates wiki pages:
 /document <feature or process name>
 ```
 
-The skill:
-1. Explores the codebase to find relevant services, types, handlers, and tests
-2. Checks existing `docs/wiki/` pages for duplicates
-3. Generates a markdown page with frontmatter, overview, Mermaid diagrams, and source links
-4. Writes to `docs/wiki/<page-slug>.md`
-5. Updates `docs/wiki/_Sidebar.md` with the new page
+Implementation: each issue → branch → PR (stacked for dependent issues)
+  → TDD implementation, push branch, create PR
+  → Automated review via claude-review workflow
+  → Merge bottom-up (L0 → L1 → L2)
 
 The skill does NOT commit or push — that follows the normal git workflow.
 
