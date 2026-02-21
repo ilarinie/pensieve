@@ -25,6 +25,7 @@ gh issue view $ARGUMENTS --repo ilarinie/pensieve --json title,body,labels,numbe
 ```
 
 Extract:
+
 - Title and description
 - Acceptance criteria (checkboxes)
 - Branch name (from the issue body, or derive from title)
@@ -39,6 +40,7 @@ gh issue view <blocking-number> --repo ilarinie/pensieve --json state --jq '.sta
 ```
 
 If any blocking issue is still OPEN, tell the user and stop:
+
 ```
 Issue #<N> is blocked by #<M> (<title>) which is still open.
 Implement the blocking issue first, or remove the dependency.
@@ -47,6 +49,7 @@ Implement the blocking issue first, or remove the dependency.
 ### 3. Read project context
 
 Read these files to understand conventions:
+
 - `CLAUDE.md` — project rules (you MUST follow all rules here)
 - The parent issue (if this is a sub-issue) for overall feature context
 - Any existing files listed in the issue's "Files" section
@@ -60,6 +63,7 @@ git checkout -b <branch-name>
 ```
 
 Use the branch name from the issue body. If not specified, derive it:
+
 - `feat/<slug>` for features
 - `fix/<slug>` for bugs
 
@@ -68,6 +72,7 @@ Use the branch name from the issue body. If not specified, derive it:
 For each file to create/modify:
 
 **a. Write the test first**
+
 - Create `<name>.test.ts` co-located with the source file
 - Follow project test conventions: `describe/test`, vitest imports, Arrange-Act-Assert
 - Tests should cover all acceptance criteria from the issue
@@ -78,6 +83,7 @@ npx vitest run <test-file-path> --reporter=verbose
 ```
 
 **b. Write the minimal implementation**
+
 - Create/modify the source file
 - Follow ALL code style rules: functional only, const + arrow, no semicolons, single quotes, .js imports, TSDoc on exports
 - Use dependency injection (db/resources as first parameter)
@@ -117,6 +123,7 @@ git push -u origin <branch-name>
 ```
 
 Commit rules:
+
 - **NO Co-Authored-By** or any signatures
 - **NO GPG signatures** (use `--no-gpg-sign`)
 - Format: `<type>: <description>` — lowercase, imperative, no period, under 72 chars
@@ -159,6 +166,7 @@ gh pr create \
 ### 9. Report completion
 
 Tell the user:
+
 - PR URL
 - What was implemented
 - Test summary (how many tests, what they cover)

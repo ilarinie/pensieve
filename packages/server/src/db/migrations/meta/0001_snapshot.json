@@ -96,12 +96,8 @@
           "name": "ingestion_log_memory_id_memories_id_fk",
           "tableFrom": "ingestion_log",
           "tableTo": "memories",
-          "columnsFrom": [
-            "memory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["memory_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -272,12 +268,8 @@
           "name": "memory_embeddings_memory_id_memories_id_fk",
           "tableFrom": "memory_embeddings",
           "tableTo": "memories",
-          "columnsFrom": [
-            "memory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["memory_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -287,10 +279,7 @@
         "uq_memory_embeddings_memory_id_model": {
           "name": "uq_memory_embeddings_memory_id_model",
           "nullsNotDistinct": false,
-          "columns": [
-            "memory_id",
-            "model"
-          ]
+          "columns": ["memory_id", "model"]
         }
       },
       "policies": {},
@@ -385,12 +374,8 @@
           "name": "tasks_source_memory_id_memories_id_fk",
           "tableFrom": "tasks",
           "tableTo": "memories",
-          "columnsFrom": [
-            "source_memory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_memory_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

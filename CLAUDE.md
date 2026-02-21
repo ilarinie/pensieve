@@ -219,6 +219,7 @@ Wiki documentation lives in `docs/wiki/` and syncs to the GitHub Wiki on merge t
 3. `/create-issues <plan-file>` — create GitHub issues with dependencies
 
 Plans use the layer system (L0/L1/L2):
+
 - L0: No dependencies on other new items (parallelizable)
 - L1: Depends on L0 items
 - L2: Orchestrators wiring everything together

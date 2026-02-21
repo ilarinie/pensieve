@@ -20,18 +20,19 @@ You are creating GitHub issues from a plan file. Follow these steps precisely.
 
 ### Hardcoded IDs
 
-| Resource | Node ID |
-|----------|---------|
-| Repo owner | `ilarinie` |
-| Repo name | `pensieve` |
-| Repo node ID | `R_kgDORUITUg` |
-| Project node ID | `PVT_kwHOAHTkk84BPpUQ` |
-| Status field ID | `PVTSSF_lAHOAHTkk84BPpUQzg9_rzQ` |
-| "Todo" option ID | `2eec6910` |
+| Resource         | Node ID                          |
+| ---------------- | -------------------------------- |
+| Repo owner       | `ilarinie`                       |
+| Repo name        | `pensieve`                       |
+| Repo node ID     | `R_kgDORUITUg`                   |
+| Project node ID  | `PVT_kwHOAHTkk84BPpUQ`           |
+| Status field ID  | `PVTSSF_lAHOAHTkk84BPpUQzg9_rzQ` |
+| "Todo" option ID | `2eec6910`                       |
 
 ### 1. Read and parse the plan file
 
 Read the file at `$ARGUMENTS`. Parse:
+
 - **YAML frontmatter**: `feature`, `description`, `labels`
 - **Work items**: Extract each `### L<N>: <slug> — <title>` section with its fields
 
@@ -120,6 +121,7 @@ gh api graphql -f query='
 ```
 
 After creating each sub-issue:
+
 - Store the mapping: `slug → { nodeId, number }`
 - Add labels using `gh issue edit <number> --add-label "layer:<N>,claude:implement,<frontmatter labels>"`
 

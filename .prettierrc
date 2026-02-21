@@ -5,47 +5,8 @@
   "semi": false,
   "trailingComma": "all",
   "arrowParens": "always",
-  "parser": "typescript",
   "importOrder": ["^./types/(.*)$", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
-  "overrides": [
-    {
-      "files": "*.less",
-      "options": {
-        "parser": "less"
-      }
-    },
-    {
-      "files": "*.css",
-      "options": {
-        "parser": "css"
-      }
-    },
-    {
-      "files": "*.json",
-      "options": {
-        "parser": "json"
-      }
-    },
-    {
-      "files": "*.md",
-      "options": {
-        "parser": "markdown"
-      }
-    },
-    {
-      "files": ".prettierrc",
-      "options": {
-        "parser": "json"
-      }
-    },
-    {
-      "files": "*.mjs",
-      "options": {
-        "parser": "babel"
-      }
-    }
-  ],
   "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }

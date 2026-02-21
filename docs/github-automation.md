@@ -18,41 +18,41 @@
 
 ### Labels
 
-| Label | Purpose |
-|-------|---------|
-| `claude:implement` | Triggers Claude to implement the issue |
-| `feature` | New feature request |
-| `bug` | Bug report |
-| `question` | Needs clarification |
-| `chore` | Maintenance task |
-| `priority:critical` | Must fix immediately |
-| `priority:high` | Important |
-| `priority:medium` | Normal priority |
-| `priority:low` | Nice to have |
-| `layer:0` | Independent, parallelizable work item |
-| `layer:1` | Depends on layer 0 items |
-| `layer:2` | Orchestrator, depends on layer 1 items |
+| Label               | Purpose                                |
+| ------------------- | -------------------------------------- |
+| `claude:implement`  | Triggers Claude to implement the issue |
+| `feature`           | New feature request                    |
+| `bug`               | Bug report                             |
+| `question`          | Needs clarification                    |
+| `chore`             | Maintenance task                       |
+| `priority:critical` | Must fix immediately                   |
+| `priority:high`     | Important                              |
+| `priority:medium`   | Normal priority                        |
+| `priority:low`      | Nice to have                           |
+| `layer:0`           | Independent, parallelizable work item  |
+| `layer:1`           | Depends on layer 0 items               |
+| `layer:2`           | Orchestrator, depends on layer 1 items |
 
 ### GitHub Actions (`.github/workflows/`)
 
 Four Claude Code workflows run on GitHub runners:
 
-| Workflow | File | Trigger |
-|----------|------|---------|
-| PR Review | `claude-review.yml` | PR opened or updated |
-| Implementation | `claude-implement.yml` | `@claude` comment or `claude:implement` label |
-| Issue Triage | `claude-triage.yml` | New issue opened |
+| Workflow           | File                     | Trigger                                         |
+| ------------------ | ------------------------ | ----------------------------------------------- |
+| PR Review          | `claude-review.yml`      | PR opened or updated                            |
+| Implementation     | `claude-implement.yml`   | `@claude` comment or `claude:implement` label   |
+| Issue Triage       | `claude-triage.yml`      | New issue opened                                |
 | Weekly Maintenance | `claude-maintenance.yml` | Monday 10:00 Helsinki (cron) or manual dispatch |
 
 ### Claude Code Skills (`.claude/skills/`)
 
 Three skills for the planning → issues → implementation workflow:
 
-| Skill | File | Purpose |
-|-------|------|---------|
-| `/plan` | `plan/SKILL.md` | Explore codebase, write structured plan file |
+| Skill            | File                     | Purpose                                                 |
+| ---------------- | ------------------------ | ------------------------------------------------------- |
+| `/plan`          | `plan/SKILL.md`          | Explore codebase, write structured plan file            |
 | `/create-issues` | `create-issues/SKILL.md` | Parse plan file, create GitHub issues with dependencies |
-| `/implement` | `implement/SKILL.md` | Local TDD implementation of a single issue |
+| `/implement`     | `implement/SKILL.md`     | Local TDD implementation of a single issue              |
 
 ### GitHub MCP Server (local Claude Code)
 
@@ -70,21 +70,21 @@ env var and Docker running.
 
 Used by `/create-issues` skill for GraphQL API calls:
 
-| Resource | Node ID |
-|----------|---------|
-| Repo | `R_kgDORUITUg` |
-| Project | `PVT_kwHOAHTkk84BPpUQ` |
-| Status field | `PVTSSF_lAHOAHTkk84BPpUQzg9_rzQ` |
-| "Todo" option | `2eec6910` |
+| Resource      | Node ID                          |
+| ------------- | -------------------------------- |
+| Repo          | `R_kgDORUITUg`                   |
+| Project       | `PVT_kwHOAHTkk84BPpUQ`           |
+| Status field  | `PVTSSF_lAHOAHTkk84BPpUQzg9_rzQ` |
+| "Todo" option | `2eec6910`                       |
 
 ---
 
 ## Secrets & Tokens
 
-| Secret | Where | Purpose |
-|--------|-------|---------|
-| `ANTHROPIC_API_KEY` | GitHub repo secret | Claude API access for GitHub Actions |
-| `GITHUB_PERSONAL_ACCESS_TOKEN` | `~/.zshrc` env var | GitHub MCP server in Claude Code |
+| Secret                         | Where              | Purpose                              |
+| ------------------------------ | ------------------ | ------------------------------------ |
+| `ANTHROPIC_API_KEY`            | GitHub repo secret | Claude API access for GitHub Actions |
+| `GITHUB_PERSONAL_ACCESS_TOKEN` | `~/.zshrc` env var | GitHub MCP server in Claude Code     |
 
 ---
 
@@ -155,11 +155,11 @@ With the GitHub MCP server running, Claude Code can interact with GitHub directl
 
 Plans decompose features into layered work items for parallel implementation:
 
-| Layer | Label | Meaning | Examples |
-|-------|-------|---------|----------|
-| L0 | `layer:0` | No deps on other new items — parallelizable | Types, standalone services, utilities |
-| L1 | `layer:1` | Depends on L0 items | Services using L0 types, endpoints |
-| L2 | `layer:2` | Orchestrators wiring L0+L1 together | Handlers, integration points |
+| Layer | Label     | Meaning                                     | Examples                              |
+| ----- | --------- | ------------------------------------------- | ------------------------------------- |
+| L0    | `layer:0` | No deps on other new items — parallelizable | Types, standalone services, utilities |
+| L1    | `layer:1` | Depends on L0 items                         | Services using L0 types, endpoints    |
+| L2    | `layer:2` | Orchestrators wiring L0+L1 together         | Handlers, integration points          |
 
 Each work item = one sub-issue = one branch = one PR. All L0 items can be
 implemented in parallel. L1 items start after their L0 dependencies merge.
@@ -181,8 +181,10 @@ labels:
 ## Work Items
 
 ### L0: schedule-config — Schedule configuration service
+
 **Branch:** `feat/phase-3-schedule-config`
 **Files:**
+
 - packages/types/schedule.ts (new)
 - packages/server/src/services/schedule/schedule-config.ts (new)
 - packages/server/src/services/schedule/schedule-config.test.ts (new)
@@ -191,12 +193,14 @@ labels:
 Parse and validate cron schedule configurations.
 
 **Acceptance Criteria:**
+
 - [ ] Validates cron expressions
 - [ ] Returns parsed schedule object
 
 ---
 
 ### L1: cron-runner — Cron job runner
+
 **Depends on:** schedule-config
 **Branch:** `feat/phase-3-cron-runner`
 ...
@@ -234,6 +238,7 @@ Runs every Monday at 10:00 Helsinki (8:00 UTC). Can also be triggered manually
 from Actions → Weekly Maintenance → Run workflow.
 
 Checks:
+
 - Outdated dependencies
 - Security vulnerabilities (npm audit)
 - Stale issues (>30 days)
@@ -256,9 +261,9 @@ the repo and wiki views.
 
 **File:** `.github/workflows/wiki-sync.yml`
 
-| Skill | Purpose |
-|-------|---------|
-| `/plan <description>` | Explore codebase, create structured plan in `docs/plans/` |
+| Skill                        | Purpose                                                       |
+| ---------------------------- | ------------------------------------------------------------- |
+| `/plan <description>`        | Explore codebase, create structured plan in `docs/plans/`     |
 | `/create-issues <plan-file>` | Parse plan file, create parent + sub-issues with dependencies |
 
 **Prerequisite:** The wiki must be initialized manually via the GitHub UI (Settings →
@@ -275,9 +280,9 @@ Creates or updates wiki pages:
 ```
 
 Implementation: each issue → branch → PR (stacked for dependent issues)
-  → TDD implementation, push branch, create PR
-  → Automated review via claude-review workflow
-  → Merge bottom-up (L0 → L1 → L2)
+→ TDD implementation, push branch, create PR
+→ Automated review via claude-review workflow
+→ Merge bottom-up (L0 → L1 → L2)
 
 The skill does NOT commit or push — that follows the normal git workflow.
 

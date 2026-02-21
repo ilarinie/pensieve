@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Pensieve - Personal Memory Assistant",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "type": "module",
   "scripts": {
     "dev": "tsx watch packages/server/src/index.ts",

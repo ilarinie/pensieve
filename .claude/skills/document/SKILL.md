@@ -23,6 +23,7 @@ Read the user's topic from `$ARGUMENTS`. The topic is a feature, service, proces
 ### 2. Explore the codebase
 
 Use Read, Grep, and Glob to find all relevant code:
+
 - Services in `packages/server/src/services/`
 - Handlers in `packages/server/src/handlers/`
 - Types in `packages/types/`
@@ -35,6 +36,7 @@ Build a complete picture of the feature: what files are involved, how data flows
 ### 3. Check existing docs
 
 Read all files in `docs/wiki/` to:
+
 - Avoid creating a duplicate page for something already documented
 - Find related pages to cross-reference
 - If a page for this topic already exists, update it instead of creating a new one
@@ -61,6 +63,7 @@ sources:
 ## Flow
 
 <Mermaid diagram showing the process flow, data flow, or architecture. Use the appropriate diagram type:>
+
 - `graph TD` for process/data flows
 - `sequenceDiagram` for interactions between components
 - `classDiagram` for type relationships (use as structure diagram, not OOP)
@@ -85,6 +88,7 @@ sources:
 ### 5. Frontmatter rules
 
 The `sources` list in frontmatter is critical — it drives staleness detection during PR reviews:
+
 - List every source file that this documentation page describes
 - Use repo-relative paths (e.g., `packages/server/src/services/memory/store-memory.ts`)
 - Include service files, handler files, type files, and schema files
@@ -99,6 +103,7 @@ The `sources` list in frontmatter is critical — it drives staleness detection 
 ### 7. Update the sidebar
 
 After writing the page, update `docs/wiki/_Sidebar.md`:
+
 - Add the new page to the navigation list
 - Keep pages in alphabetical order (after Home)
 - Use wiki-style links: `[Page Title](page-slug)`
@@ -106,6 +111,7 @@ After writing the page, update `docs/wiki/_Sidebar.md`:
 ### 8. Report to user
 
 Tell the user:
+
 - The file path of the created/updated page
 - A summary of what was documented
 - Which source files are tracked in `sources`

@@ -43,7 +43,7 @@ The process entry point. Calls `createApp()` to get the configured Express app, 
 ## API Reference
 
 | Method | Path            | Response Code | Response Body        |
-|--------|-----------------|---------------|----------------------|
+| ------ | --------------- | ------------- | -------------------- |
 | GET    | `/health-check` | 200           | `{ "status": "ok" }` |
 
 ## Related Pages
